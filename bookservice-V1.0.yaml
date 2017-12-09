@@ -1,0 +1,313 @@
+swagger: '2.0'
+info:
+  version: 1.1.0
+  title: Book API
+  description: A simple API to learn how to write OpenAPI Specification
+schemes:
+  - http
+host: .
+basePath: /books
+consumes:
+  - application/json
+  - application/x-yaml
+produces:
+  - application/json
+  - application/x-yaml
+paths:
+  /books:
+    get:
+      summary: Get the list of all books
+      description: Returns a list containing all books. The list supports paging.
+      parameters:
+        - $ref: '#/parameters/pageSize'
+        - $ref: '#/parameters/pageNumber'
+      responses:
+        '200':
+          description: A list of Books
+          schema:
+            $ref: '#/definitions/Books'
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+    post:
+      summary: Creates a book
+      description: Adds a new book to the books list.
+      parameters:
+        - name: book
+          in: body
+          required: true
+          description: The book to create.
+          schema:
+            $ref: '#/definitions/Book'
+      responses:
+        '204':
+          description: Book succesfully created.
+        '400':
+          description: Person couldn't have been created.
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+    put:
+      summary: update a book
+      description: Adds a new book to the books list.
+      parameters:
+        - name: book
+          in: body
+          required: true
+          description: The book to create.
+          schema:
+            $ref: '#/definitions/Book'
+      responses:
+        '204':
+          description: Book succesfully updaated.
+        '400':
+          description: Person couldn't be updated.
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+  '/books/{isbnnumber}':
+    parameters:
+      - $ref: '#/parameters/isbnNumber'
+    get:
+      summary: Gets a book
+      description: Returns a single book with the ISBN Number.
+      responses:
+        '200':
+          description: A Book
+          schema:
+            $ref: '#/definitions/Book'
+        '404':
+          $ref: '#/responses/PersonDoesNotExistResponse'
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+    delete:
+      summary: Deletes a book
+      description: Delete a single book identified via its isbn number
+      responses:
+        '204':
+          description: Book successfully deleted.
+        '404':
+          $ref: '#/responses/PersonDoesNotExistResponse'
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+  /authors:
+    get:
+      summary: Get the list of all authors
+      description: Returns a list containing all authors. The list supports paging.
+      parameters:
+        - $ref: '#/parameters/pageSize'
+        - $ref: '#/parameters/pageNumber'
+      responses:
+        '200':
+          description: A list of Authors
+          schema:
+            $ref: '#/definitions/Authors'
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+    post:
+      summary: Creates a Author
+      description: Adds a new author to the authors list.
+      parameters:
+        - name: authors
+          in: body
+          required: true
+          description: The author to create.
+          schema:
+            $ref: '#/definitions/Authors'
+      responses:
+        '204':
+          schema:
+            $ref: '#/definitions/Authors'
+          description: Author succesfully created.
+        '400':
+          description: Author couldn't have been created.
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+    put:
+      summary: updates a Author
+      description: updates a new author to the authors list.
+      parameters:
+        - name: author
+          in: body
+          required: true
+          description: The author to create.
+          schema:
+            $ref: '#/definitions/Author'
+      responses:
+        '204':
+          description: Author succesfully updated.
+        '400':
+          description: Author couldn't have been updated.
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+  '/author/{authorname}':
+    parameters:
+      - $ref: '#/parameters/authorname'
+    get:
+      summary: Gets a book
+      description: Returns the author details.
+      responses:
+        '200':
+          description: A Author
+          schema:
+            $ref: '#/definitions/Author'
+        '404':
+          $ref: '#/responses/PersonDoesNotExistResponse'
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+    delete:
+      summary: Deletes a author
+      description: Delete a single author identified by his name
+      responses:
+        '204':
+          description: Author successfully deleted.
+        '404':
+          $ref: '#/responses/PersonDoesNotExistResponse'
+        '500':
+          $ref: '#/responses/Standard500ErrorResponse'
+        default:
+          $ref: '#/responses/TotallyUnexpectedResponse'
+definitions:
+  Book:
+    required:
+      - title
+      - ISBNNumber
+    properties:
+      title:
+        type: string
+      ISBNNumber:
+        type: string
+      genre:
+        type: string
+      price:
+        type: number
+        format: double
+        minimum: 0
+        maximum: 100000
+      author:
+        $ref: '#/definitions/Author'
+  Books:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/definitions/Book'
+  Author:
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        pattern: '[a-z0-9]{8,64}'
+        minLength: 1
+        maxLength: 256
+        uniqueItems: true
+      dateOfBirth:
+        type: string
+        format: date
+      languages:
+        type: array
+        items:
+          type: string
+  Authors:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/definitions/Author'
+  ErrorMessage:
+    required:
+      - longMessage
+      - shortMessage
+    properties:
+      longMessage:
+        type: string
+      shortMessage:
+        type: string
+  MultilingualErrorMessage:
+    additionalProperties:
+      $ref: '#/definitions/ErrorMessage'
+    properties:
+      defaultLanguage:
+        $ref: '#/definitions/ErrorMessage'
+  Error:
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+        enum:
+          - DBERR
+          - NTERR
+          - UNERR
+      message:
+        $ref: '#/definitions/MultilingualErrorMessage'
+  Paging:
+    required:
+      - totalItems
+      - totalPages
+      - pageSize
+      - currentPage
+    properties:
+      totalItems:
+        type: integer
+      totalPages:
+        type: integer
+      pageSize:
+        type: integer
+      currentPage:
+        type: integer
+responses:
+  Standard500ErrorResponse:
+    description: An unexpected error occured.
+    schema:
+      $ref: '#/definitions/Error'
+  PersonDoesNotExistResponse:
+    description: Person does not exist.
+  TotallyUnexpectedResponse:
+    description: A totally unexpected response
+parameters:
+  isbnNumber:
+    name: isbnnumber
+    in: path
+    required: true
+    description: The books's isbnnumber
+    type: string
+  authorname:
+    name: authorname
+    in: path
+    required: true
+    description: The authors name
+    type: string
+  pageSize:
+    name: pageSize
+    in: query
+    description: Number of persons returned
+    type: integer
+    format: int32
+    minimum: 0
+    exclusiveMinimum: true
+    maximum: 100
+    exclusiveMaximum: false
+    multipleOf: 10
+    default: 20
+  pageNumber:
+    name: pageNumber
+    in: query
+    description: Page number
+    type: integer
+    default: 1
